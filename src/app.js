@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import userRouter from "./routes/user.routes.js";
 
 const app = express();
 
@@ -17,9 +18,7 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 // Routes
-app.get("/", (req, res) => {
-  res.send("Hello Welcome backend Series");
-});
+app.use("/api/users", userRouter);
 
 // error middleware
 app.use(errorHandler);
