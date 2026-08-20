@@ -43,10 +43,6 @@ const getAllCategory = asyncHandler(async (req, res) => {
 
   const totalPages = Math.ceil(totalCategories / limit);
 
-  if (!categories) {
-    throw new ApiError(404, "Categories not found");
-  }
-
   return res.status(200).json(
     new ApiResponse(
       200,
@@ -64,4 +60,45 @@ const getAllCategory = asyncHandler(async (req, res) => {
   );
 });
 
-export { createCategory, getAllCategory };
+// Category Update API
+// const updateCategory = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const category = await Category.findByIdAndUpdate(id, req.body, {
+//     new: true,
+//   });
+
+//   if (!category) {
+//     throw new ApiError(404, "Category not found");
+//   }
+//   return res
+//     .status(200)
+//     .json(new ApiResponse(200, category, "Category Updated Successfully"));
+// });
+
+const updateCategory = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+
+  const category = await Category.findById(id);
+
+  if (!category) {
+    throw new ApiError(404, "Category not found");
+  }
+
+  if (name !== undefined) {
+    category.name = name;
+  }
+
+  if (description !== undefined) {
+    category.description = description;
+  }
+
+  await category.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, category, "Category Updated Successfully"));
+});
+
+export { createCategory, getAllCategory, updateCategory };
