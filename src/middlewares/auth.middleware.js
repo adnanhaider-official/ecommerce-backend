@@ -27,4 +27,12 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
   next();
 });
 
-export default verifyJwt;
+const isAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    throw new ApiError(403, "Access denied. Admin only.");
+  }
+
+  next();
+};
+
+export { verifyJwt, isAdmin };
