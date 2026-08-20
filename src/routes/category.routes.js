@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createCategory,
+  deleteCategory,
   getAllCategories,
   updateCategory,
 } from "../controllers/category.controller.js";
@@ -14,5 +15,7 @@ router.post("/", verifyJwt, isAdmin, createCategory);
 router.get("/", getAllCategories);
 
 router.patch("/:id", verifyJwt, isAdmin, updateCategory);
+
+router.delete("/:id", verifyJwt, isAdmin, deleteCategory);
 
 export default router;
