@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import productRoutes from "./routes/product.routes.js";
 import errorHandler from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cookieParser());
 // Routes
 app.use("/api/users", userRouter);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/products", productRoutes);
 
 // error middleware
 app.use(errorHandler);

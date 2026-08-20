@@ -28,7 +28,7 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 // Get All Categories
-const getAllCategory = asyncHandler(async (req, res) => {
+const getAllCategories = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
 
@@ -119,4 +119,4 @@ const deleteCategory = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, category, "Category delete Successfully"));
 });
 
-export { createCategory, getAllCategory, updateCategory, deleteCategory };
+export { createCategory, getAllCategories, updateCategory, deleteCategory };
