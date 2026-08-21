@@ -73,7 +73,11 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
   const brand = req.query.brand;
 
+  const sort = req.query.sort || "name_asc";
+
   const filter = {};
+
+  let sortOptions = {};
 
   if (search) {
     filter.name = {
@@ -115,8 +119,32 @@ const getAllProducts = asyncHandler(async (req, res) => {
     };
   }
 
+  if (sort === "name_asc") {
+    sortOptions = {
+      name: 1,
+    };
+  }
+
+  if (sort === "name_desc") {
+    sortOptions = {
+      name: -1,
+    };
+  }
+
+  if (sort === "price_asc") {
+    sortOptions = {
+      price: 1,
+    };
+  }
+
+  if (sort === "price_desc") {
+    sortOptions = {
+      price: -1,
+    };
+  }
+
   const products = await Product.find(filter)
-    .sort({ name: 1 })
+    .sort(sortOptions)
     .skip(skip)
     .limit(limit);
 
