@@ -72,6 +72,10 @@ const getAllProducts = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Limit must be at least 1");
   }
 
+  if (limit > 100) {
+    throw new ApiError(400, "Limit cannot be greater than 100");
+  }
+
   const skip = (page - 1) * limit;
 
   const search = req.query.search;
@@ -158,14 +162,21 @@ const getAllProducts = asyncHandler(async (req, res) => {
     };
   }
 
+  const totalProducts = await Product.countDocuments(filter);
+
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  if (page > totalPages && totalPages > 0) {
+    throw new ApiError(404, "Page not found");
+  }
+
+  const hasNextPage = page < totalPages;
+  const hasPreviousPage = page > 1;
+
   const products = await Product.find(filter)
     .sort(sortOptions)
     .skip(skip)
     .limit(limit);
-
-  const totalProducts = await Product.countDocuments(filter);
-
-  const totalPages = Math.ceil(totalProducts / limit);
 
   return res.status(200).json(
     new ApiResponse(
@@ -177,6 +188,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
           limit,
           totalPages,
           totalProducts,
+          hasNextPage,
+          hasPreviousPage,
         },
       },
       "Fetch All Products Successfully"
