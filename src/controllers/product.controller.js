@@ -119,6 +119,16 @@ const getAllProducts = asyncHandler(async (req, res) => {
     };
   }
 
+  // Sort validation
+  if (
+    sort !== "name_asc" &&
+    sort !== "name_desc" &&
+    sort !== "price_asc" &&
+    sort !== "price_desc"
+  ) {
+    throw new ApiError(400, "Invalid sort option");
+  }
+
   if (sort === "name_asc") {
     sortOptions = {
       name: 1,
