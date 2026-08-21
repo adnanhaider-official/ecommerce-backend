@@ -63,20 +63,25 @@ const getAllProducts = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
 
+  // Pagination validation
+  if (page < 1) {
+    throw new ApiError(400, "Page must be at least 1");
+  }
+
+  if (limit < 1) {
+    throw new ApiError(400, "Limit must be at least 1");
+  }
+
   const skip = (page - 1) * limit;
 
   const search = req.query.search;
   const category = req.query.category;
-
   const minPrice = Number(req.query.minPrice);
   const maxPrice = Number(req.query.maxPrice);
-
   const brand = req.query.brand;
-
   const sort = req.query.sort || "name_asc";
 
   const filter = {};
-
   let sortOptions = {};
 
   if (search) {
