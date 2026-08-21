@@ -71,6 +71,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
     new ApiResponse(
       200,
       {
+        products,
         pagination: {
           currentPage: page,
           limit,
@@ -83,4 +84,18 @@ const getAllProducts = asyncHandler(async (req, res) => {
   );
 });
 
-export { createProduct, getAllProducts };
+const getSingleProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const product = await Product.findById(id);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, product, "Fetch Single Product Successfully"));
+});
+
+export { createProduct, getAllProducts, getSingleProduct };
