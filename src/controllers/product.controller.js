@@ -7,6 +7,7 @@ import {
   uploadOnCloudinary,
   deleteFromCloudinary,
 } from "../utils/Cloudinary.js";
+import mongoose from "mongoose";
 
 const createProduct = asyncHandler(async (req, res) => {
   const { name, description, price, stock, category, brand } = req.body;
@@ -64,12 +65,62 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
   const skip = (page - 1) * limit;
 
-  const products = await Product.find()
+  const search = req.query.search;
+  const category = req.query.category;
+
+  const minPrice = Number(req.query.minPrice);
+  const maxPrice = Number(req.query.maxPrice);
+
+  const brand = req.query.brand;
+
+  const filter = {};
+
+  if (search) {
+    filter.name = {
+      $regex: search,
+      $options: "i",
+    };
+  }
+
+  if (category) {
+    if (!mongoose.isValidObjectId(category)) {
+      throw new ApiError(400, "Invalid category ID");
+    }
+
+    const existingCategory = await Category.findById(category);
+
+    if (!existingCategory) {
+      throw new ApiError(404, "Category not found");
+    }
+    filter.category = category;
+  }
+
+  if (!isNaN(minPrice)) {
+    filter.price = {
+      $gte: minPrice,
+    };
+  }
+
+  if (!isNaN(maxPrice)) {
+    filter.price = {
+      ...filter.price,
+      $lte: maxPrice,
+    };
+  }
+
+  if (brand) {
+    filter.brand = {
+      $regex: brand,
+      $options: "i",
+    };
+  }
+
+  const products = await Product.find(filter)
     .sort({ name: 1 })
     .skip(skip)
     .limit(limit);
 
-  const totalProducts = await Product.countDocuments();
+  const totalProducts = await Product.countDocuments(filter);
 
   const totalPages = Math.ceil(totalProducts / limit);
 
