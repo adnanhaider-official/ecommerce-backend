@@ -3,7 +3,10 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { Product } from "../models/product.model.js";
 import { Category } from "../models/category.model.js";
-import uploadOnCloudinary from "../utils/Cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/Cloudinary.js";
 
 const createProduct = asyncHandler(async (req, res) => {
   const { name, description, price, stock, category, brand } = req.body;
@@ -42,7 +45,10 @@ const createProduct = asyncHandler(async (req, res) => {
     price,
     stock,
     category,
-    image: productImage.url,
+    image: {
+      url: productImage.url,
+      public_id: productImage.public_id,
+    },
     brand: brand?.trim() || "",
     isActive: true,
   });
@@ -98,4 +104,60 @@ const getSingleProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "Fetch Single Product Successfully"));
 });
 
-export { createProduct, getAllProducts, getSingleProduct };
+const updateProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const { name, description, price, stock, category, brand } = req.body;
+
+  const product = await Product.findById(id);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  // Category update
+  if (category) {
+    const existingCategory = await Category.findById(category);
+
+    if (!existingCategory) {
+      throw new ApiError(404, "Category not found");
+    }
+
+    product.category = category;
+  }
+
+  // Other fields update
+  product.name = name || product.name;
+  product.description = description || product.description;
+  product.price = price ?? product.price;
+  product.stock = stock ?? product.stock;
+  product.brand = brand || product.brand;
+
+  // Image update
+  const productImageLocalPath = req.file?.path;
+
+  if (productImageLocalPath) {
+    const oldPublicId = product.image.public_id;
+
+    const productImage = await uploadOnCloudinary(productImageLocalPath);
+
+    if (!productImage) {
+      throw new ApiError(500, "Product image upload failed");
+    }
+
+    await deleteFromCloudinary(oldPublicId);
+
+    product.image = {
+      url: productImage.url,
+      public_id: productImage.public_id,
+    };
+  }
+
+  await product.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, product, "Product updated successfully"));
+});
+
+export { createProduct, getAllProducts, getSingleProduct, updateProduct };
