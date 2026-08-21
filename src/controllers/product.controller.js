@@ -160,4 +160,30 @@ const updateProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "Product updated successfully"));
 });
 
-export { createProduct, getAllProducts, getSingleProduct, updateProduct };
+const deleteProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const product = await Product.findById(id);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  const publicId = product.image.public_id;
+
+  await deleteFromCloudinary(publicId);
+
+  await product.deleteOne();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Product deleted successfully"));
+});
+
+export {
+  createProduct,
+  getAllProducts,
+  getSingleProduct,
+  updateProduct,
+  deleteProduct,
+};
