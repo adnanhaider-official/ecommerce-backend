@@ -25,6 +25,13 @@ const createOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Shipping address is required");
   }
 
+  // Check stock
+  for (const item of cart.items) {
+    if (item.quantity > item.product.stock) {
+      throw new ApiError(400, `Insufficient stock for ${item.product.name}`);
+    }
+  }
+
   const totalAmount = cart.items.reduce((total, item) => {
     return total + item.product.price * item.quantity;
   }, 0);
@@ -41,6 +48,12 @@ const createOrder = asyncHandler(async (req, res) => {
     totalAmount,
     shippingAddress,
   });
+
+  // Decrease stock
+  for (const item of cart.items) {
+    item.product.stock -= item.quantity;
+    await item.product.save();
+  }
 
   cart.items = [];
 
