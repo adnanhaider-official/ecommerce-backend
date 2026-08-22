@@ -5,6 +5,7 @@ import userRouter from "./routes/user.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import orderRouter from "./routes/order.routes.js";
 import errorHandler from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/users", userRouter);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRouter);
 
 // error middleware
 app.use(errorHandler);
